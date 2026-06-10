@@ -17,6 +17,7 @@ const Pomodoro = (function() {
     let currentPhase = PHASE.FOCUS;
     let completedPomodorosInSession = 0;
     let totalCompletedPomodoros = 0;
+    let currentPhaseStartTime = 0;
     let onPhaseChangeCallback = null;
     let onPomodoroCompleteCallback = null;
 
@@ -80,6 +81,14 @@ const Pomodoro = (function() {
         return config.longBreakInterval;
     }
 
+    function setPhaseStartTime(time) {
+        currentPhaseStartTime = time;
+    }
+
+    function getPhaseStartTime() {
+        return currentPhaseStartTime;
+    }
+
     function shouldAutoStartNext() {
         if (currentPhase === PHASE.FOCUS) {
             return config.autoStartBreak;
@@ -87,12 +96,23 @@ const Pomodoro = (function() {
         return config.autoStartFocus;
     }
 
-    function nextPhase() {
+    function nextPhase(activeTask) {
+        const endTime = Date.now();
+        
         if (currentPhase === PHASE.FOCUS) {
             completedPomodorosInSession++;
             totalCompletedPomodoros++;
             
-            StorageManager.incrementPomodoros(getPhaseDuration());
+            const duration = getPhaseDuration();
+            StorageManager.incrementPomodoros(duration);
+            
+            StorageManager.addFocusRecord({
+                startTime: currentPhaseStartTime || (endTime - duration * 1000),
+                endTime: endTime,
+                duration: duration,
+                taskId: activeTask?.id || null,
+                taskText: activeTask?.text || ''
+            });
             
             if (onPomodoroCompleteCallback) {
                 onPomodoroCompleteCallback({
@@ -121,8 +141,8 @@ const Pomodoro = (function() {
         return currentPhase;
     }
 
-    function skipPhase() {
-        return nextPhase();
+    function skipPhase(activeTask) {
+        return nextPhase(activeTask);
     }
 
     function resetSession() {
@@ -158,6 +178,8 @@ const Pomodoro = (function() {
         getTotalCompletedPomodoros,
         getLongBreakInterval,
         shouldAutoStartNext,
+        setPhaseStartTime,
+        getPhaseStartTime,
         nextPhase,
         skipPhase,
         resetSession,

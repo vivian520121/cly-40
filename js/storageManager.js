@@ -21,7 +21,8 @@ const StorageManager = (function() {
             completedPomodoros: 0,
             totalFocusTime: 0,
             completedTasks: 0
-        }
+        },
+        focusHistory: []
     };
 
     function load() {
@@ -33,7 +34,8 @@ const StorageManager = (function() {
                     pomodoroConfig: { ...defaultData.pomodoroConfig, ...parsed.pomodoroConfig },
                     timerConfig: { ...defaultData.timerConfig, ...parsed.timerConfig },
                     tasks: parsed.tasks || defaultData.tasks,
-                    stats: { ...defaultData.stats, ...parsed.stats }
+                    stats: { ...defaultData.stats, ...parsed.stats },
+                    focusHistory: parsed.focusHistory || defaultData.focusHistory
                 };
             }
         } catch (e) {
@@ -89,6 +91,41 @@ const StorageManager = (function() {
         return save(data);
     }
 
+    function addFocusRecord(record) {
+        const data = load();
+        const focusRecord = {
+            id: Date.now().toString(),
+            startTime: record.startTime,
+            endTime: record.endTime,
+            duration: record.duration,
+            taskId: record.taskId || null,
+            taskText: record.taskText || '',
+            date: new Date(record.startTime).toISOString().split('T')[0],
+            completed: true
+        };
+        data.focusHistory.push(focusRecord);
+        return save(data);
+    }
+
+    function getFocusHistory(startDate, endDate) {
+        const data = load();
+        let history = data.focusHistory || [];
+        
+        if (startDate && endDate) {
+            const start = new Date(startDate).getTime();
+            const end = new Date(endDate).getTime() + 86400000;
+            history = history.filter(r => r.startTime >= start && r.startTime < end);
+        }
+        
+        return history.sort((a, b) => b.startTime - a.startTime);
+    }
+
+    function saveFocusHistory(history) {
+        const data = load();
+        data.focusHistory = history;
+        return save(data);
+    }
+
     return {
         load,
         save,
@@ -97,6 +134,9 @@ const StorageManager = (function() {
         saveTasks,
         saveStats,
         incrementPomodoros,
-        incrementCompletedTasks
+        incrementCompletedTasks,
+        addFocusRecord,
+        getFocusHistory,
+        saveFocusHistory
     };
 })();

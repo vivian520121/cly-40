@@ -12,6 +12,9 @@ const App = (function() {
 
     function cacheElements() {
         elements.body = document.body;
+        elements.navBtns = document.querySelectorAll('.nav-btn');
+        elements.pageTimer = document.getElementById('pageTimer');
+        elements.pageStatistics = document.getElementById('pageStatistics');
         elements.modeTabs = document.querySelectorAll('.tab-btn');
         elements.timeDisplay = document.getElementById('timeDisplay');
         elements.startBtn = document.getElementById('startBtn');
@@ -57,6 +60,7 @@ const App = (function() {
         Pomodoro.init(storedData.pomodoroConfig, storedData.stats);
         TaskManager.init(storedData.tasks);
         ProgressRing.init(elements.ringProgress);
+        Statistics.init();
 
         Timer.onTick(handleTick);
         Timer.onComplete(handleComplete);
@@ -66,9 +70,15 @@ const App = (function() {
         Pomodoro.onPomodoroComplete(handlePomodoroComplete);
 
         TaskManager.onTasksChange(handleTasksChange);
+
+        Statistics.onDataChange(updateStatsDisplay);
     }
 
     function setupEventListeners() {
+        elements.navBtns.forEach(btn => {
+            btn.addEventListener('click', () => switchPage(btn.dataset.page));
+        });
+
         elements.modeTabs.forEach(tab => {
             tab.addEventListener('click', () => switchMode(tab.dataset.mode));
         });
@@ -124,6 +134,19 @@ const App = (function() {
         renderTasks();
     }
 
+    function switchPage(page) {
+        elements.navBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.page === page);
+        });
+
+        elements.pageTimer.classList.toggle('active', page === 'timer');
+        elements.pageStatistics.classList.toggle('active', page === 'statistics');
+
+        if (page === 'statistics') {
+            Statistics.refreshAll();
+        }
+    }
+
     function switchMode(mode) {
         if (Timer.isRunning()) return;
 
@@ -167,6 +190,7 @@ const App = (function() {
             Timer.pause();
         } else {
             if (Timer.getMode() === Timer.MODE.POMODORO && Timer.getState() === Timer.STATE.IDLE) {
+                Pomodoro.setPhaseStartTime(Date.now());
                 if (Pomodoro.getPhase() === Pomodoro.PHASE.FOCUS) {
                     SoundManager.playFocusStartSound();
                 } else {
@@ -199,9 +223,11 @@ const App = (function() {
         SoundManager.playClickSound();
         
         Timer.reset();
-        Pomodoro.skipPhase();
+        const activeTask = TaskManager.getActiveTask();
+        Pomodoro.skipPhase(activeTask);
         
         const nextPhase = Pomodoro.getPhase();
+        Pomodoro.setPhaseStartTime(Date.now());
         if (nextPhase === Pomodoro.PHASE.FOCUS) {
             SoundManager.playFocusStartSound();
         } else {
@@ -245,7 +271,7 @@ const App = (function() {
                 TaskManager.incrementTaskPomodoros(activeTask.id);
             }
 
-            Pomodoro.nextPhase();
+            Pomodoro.nextPhase(activeTask);
             
             Timer.setDuration(Pomodoro.getPhaseDuration());
             ProgressRing.reset();
@@ -254,6 +280,7 @@ const App = (function() {
 
             if (Pomodoro.shouldAutoStartNext()) {
                 setTimeout(() => {
+                    Pomodoro.setPhaseStartTime(Date.now());
                     if (Pomodoro.getPhase() === Pomodoro.PHASE.FOCUS) {
                         SoundManager.playFocusStartSound();
                     } else {
@@ -290,6 +317,9 @@ const App = (function() {
     function handlePomodoroComplete(data) {
         updatePomodoroCounter();
         updateStatsDisplay();
+        if (elements.pageStatistics.classList.contains('active')) {
+            Statistics.refreshAll();
+        }
     }
 
     function handleTasksChange(data) {
