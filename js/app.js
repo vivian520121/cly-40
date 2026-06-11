@@ -125,6 +125,7 @@ const App = (function() {
 
         document.addEventListener('keydown', handleKeydown);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
+        window.addEventListener('resize', handleWindowResize);
     }
 
     function loadStoredData() {
@@ -149,6 +150,29 @@ const App = (function() {
     function initTaskDrawerPosition() {
         if (window.innerWidth <= 640) {
             elements.taskDrawer.style.top = window.innerHeight + 20 + 'px';
+            elements.taskDrawer.style.left = '';
+            elements.taskDrawer.style.right = '';
+            elements.taskDrawer.style.bottom = '';
+            elements.taskDrawer.style.position = '';
+            elements.taskDrawer.style.zIndex = '';
+        } else {
+            elements.taskDrawer.style.top = '';
+            elements.taskDrawer.style.left = '';
+            elements.taskDrawer.style.right = '';
+            elements.taskDrawer.style.bottom = '';
+            elements.taskDrawer.style.position = '';
+            elements.taskDrawer.style.zIndex = '';
+        }
+    }
+
+    function handleWindowResize() {
+        const isMobile = window.innerWidth <= 640;
+        if ((isMobile && elements.taskDrawer.style.top === '') || 
+            (!isMobile && elements.taskDrawer.style.top !== '')) {
+            if (elements.taskDrawer.classList.contains('open')) {
+                closeTaskDrawer();
+            }
+            initTaskDrawerPosition();
         }
     }
 
