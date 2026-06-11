@@ -21,6 +21,7 @@ const App = (function() {
         elements.startBtnText = document.getElementById('startBtnText');
         elements.resetBtn = document.getElementById('resetBtn');
         elements.skipBtn = document.getElementById('skipBtn');
+        elements.themeToggle = document.getElementById('themeToggle');
         elements.soundToggle = document.getElementById('soundToggle');
         elements.fullscreenToggle = document.getElementById('fullscreenToggle');
         elements.ringProgress = document.querySelector('.ring-progress');
@@ -49,6 +50,10 @@ const App = (function() {
         elements.taskList = document.getElementById('taskList');
         elements.taskCount = document.getElementById('taskCount');
         elements.taskTemplate = document.getElementById('taskTemplate');
+        elements.taskDrawerToggle = document.getElementById('taskDrawerToggle');
+        elements.taskDrawer = document.getElementById('taskDrawer');
+        elements.taskDrawerBackdrop = document.getElementById('taskDrawerBackdrop');
+        elements.taskDrawerBadge = document.getElementById('taskDrawerBadge');
         
         elements.statPomodoros = document.getElementById('statPomodoros');
         elements.statFocusTime = document.getElementById('statFocusTime');
@@ -87,6 +92,7 @@ const App = (function() {
         elements.resetBtn.addEventListener('click', resetTimer);
         elements.skipBtn.addEventListener('click', skipPomodoro);
 
+        elements.themeToggle.addEventListener('click', toggleTheme);
         elements.soundToggle.addEventListener('click', toggleSound);
         elements.fullscreenToggle.addEventListener('click', toggleFullscreen);
 
@@ -114,6 +120,9 @@ const App = (function() {
             if (e.key === 'Enter') addTask();
         });
 
+        elements.taskDrawerToggle.addEventListener('click', toggleTaskDrawer);
+        elements.taskDrawerBackdrop.addEventListener('click', closeTaskDrawer);
+
         document.addEventListener('keydown', handleKeydown);
         document.addEventListener('fullscreenchange', handleFullscreenChange);
     }
@@ -129,6 +138,8 @@ const App = (function() {
         elements.countdownMinutes.value = timerConfig.countdownMinutes;
         elements.countdownSeconds.value = timerConfig.countdownSeconds;
 
+        applyTheme(storedData.theme || 'dark');
+        updateThemeButton();
         updateSoundButton();
         updateStatsDisplay();
         renderTasks();
@@ -406,9 +417,31 @@ const App = (function() {
         }
     }
 
+    function toggleTaskDrawer() {
+        if (elements.taskDrawer.classList.contains('open')) {
+            closeTaskDrawer();
+        } else {
+            openTaskDrawer();
+        }
+        SoundManager.playClickSound();
+    }
+
+    function openTaskDrawer() {
+        elements.taskDrawer.classList.add('open');
+        elements.taskDrawerBackdrop.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeTaskDrawer() {
+        elements.taskDrawer.classList.remove('open');
+        elements.taskDrawerBackdrop.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
     function renderTasks() {
         const tasks = TaskManager.getTasks();
         elements.taskCount.textContent = `${tasks.length} 项`;
+        elements.taskDrawerBadge.textContent = tasks.length;
         elements.taskList.innerHTML = '';
 
         if (tasks.length === 0) {
@@ -455,6 +488,31 @@ const App = (function() {
         });
     }
 
+    function toggleTheme() {
+        const currentTheme = storedData.theme || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        setTheme(newTheme);
+        SoundManager.playClickSound();
+    }
+
+    function setTheme(theme) {
+        storedData.theme = theme;
+        StorageManager.saveTheme(theme);
+        applyTheme(theme);
+        updateThemeButton();
+    }
+
+    function applyTheme(theme) {
+        elements.body.classList.toggle('theme-light', theme === 'light');
+        elements.body.classList.toggle('theme-dark', theme === 'dark');
+    }
+
+    function updateThemeButton() {
+        const theme = storedData.theme || 'dark';
+        elements.themeToggle.classList.toggle('theme-light', theme === 'light');
+        elements.themeToggle.classList.toggle('theme-dark', theme === 'dark');
+    }
+
     function toggleSound() {
         const enabled = !SoundManager.isEnabled();
         SoundManager.setEnabled(enabled);
@@ -493,8 +551,13 @@ const App = (function() {
             toggleTimer();
         } else if (e.code === 'KeyR') {
             resetTimer();
-        } else if (e.code === 'Escape' && document.fullscreenElement) {
-            document.exitFullscreen();
+        } else if (e.code === 'Escape') {
+            if (document.fullscreenElement) {
+                document.exitFullscreen();
+            }
+            if (elements.taskDrawer.classList.contains('open')) {
+                closeTaskDrawer();
+            }
         } else if (e.code === 'KeyF' && e.ctrlKey) {
             e.preventDefault();
             toggleFullscreen();

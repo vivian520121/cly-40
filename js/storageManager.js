@@ -22,7 +22,8 @@ const StorageManager = (function() {
             totalFocusTime: 0,
             completedTasks: 0
         },
-        focusHistory: []
+        focusHistory: [],
+        theme: 'dark'
     };
 
     function load() {
@@ -35,7 +36,8 @@ const StorageManager = (function() {
                     timerConfig: { ...defaultData.timerConfig, ...parsed.timerConfig },
                     tasks: parsed.tasks || defaultData.tasks,
                     stats: { ...defaultData.stats, ...parsed.stats },
-                    focusHistory: parsed.focusHistory || defaultData.focusHistory
+                    focusHistory: parsed.focusHistory || defaultData.focusHistory,
+                    theme: parsed.theme || defaultData.theme
                 };
             }
         } catch (e) {
@@ -126,6 +128,12 @@ const StorageManager = (function() {
         return save(data);
     }
 
+    function saveTheme(theme) {
+        const data = load();
+        data.theme = theme;
+        return save(data);
+    }
+
     return {
         load,
         save,
@@ -137,6 +145,7 @@ const StorageManager = (function() {
         incrementCompletedTasks,
         addFocusRecord,
         getFocusHistory,
-        saveFocusHistory
+        saveFocusHistory,
+        saveTheme
     };
 })();
