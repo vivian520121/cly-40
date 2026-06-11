@@ -143,6 +143,13 @@ const App = (function() {
         updateSoundButton();
         updateStatsDisplay();
         renderTasks();
+        initTaskDrawerPosition();
+    }
+
+    function initTaskDrawerPosition() {
+        if (window.innerWidth <= 640) {
+            elements.taskDrawer.style.top = window.innerHeight + 20 + 'px';
+        }
     }
 
     function switchPage(page) {
@@ -429,12 +436,19 @@ const App = (function() {
     function openTaskDrawer() {
         elements.taskDrawer.classList.add('open');
         elements.taskDrawerBackdrop.classList.add('active');
+        if (window.innerWidth <= 640) {
+            const drawerTop = Math.max(window.innerHeight * 0.3, window.innerHeight - 500);
+            elements.taskDrawer.style.top = drawerTop + 'px';
+        }
         document.body.style.overflow = 'hidden';
     }
 
     function closeTaskDrawer() {
         elements.taskDrawer.classList.remove('open');
         elements.taskDrawerBackdrop.classList.remove('active');
+        if (window.innerWidth <= 640) {
+            elements.taskDrawer.style.top = window.innerHeight + 20 + 'px';
+        }
         document.body.style.overflow = '';
     }
 

@@ -58,7 +58,6 @@ body.theme-light {
 
 html, body {
     height: 100%;
-    overflow: hidden;
 }
 
 body {
@@ -69,6 +68,7 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color var(--transition-normal), color var(--transition-normal);
+    overflow-x: hidden;
 }
 
 body::before {
@@ -99,7 +99,7 @@ body.theme-light::before {
 .app-container {
     position: relative;
     z-index: 1;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     max-width: 1400px;
@@ -188,7 +188,7 @@ body.theme-light::before {
     flex: 1;
     display: block;
     min-height: 0;
-    overflow: hidden;
+    overflow: visible;
 }
 
 .timer-section {
@@ -604,6 +604,76 @@ body.mode-countdown .btn-primary:hover {
     text-align: center;
 }
 
+.task-drawer-toggle {
+    display: none;
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 100;
+    padding: 12px 20px;
+    background: linear-gradient(135deg, var(--color-accent-neutral) 0%, #d48806 100%);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
+    align-items: center;
+    gap: 8px;
+    transition: all var(--transition-fast);
+    font-family: inherit;
+}
+
+.task-drawer-toggle:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 25px rgba(243, 156, 18, 0.5);
+}
+
+.task-drawer-toggle svg {
+    width: 18px;
+    height: 18px;
+}
+
+.task-drawer-badge {
+    background: rgba(255, 255, 255, 0.3);
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.task-drawer-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 200;
+    opacity: 0;
+    transition: opacity var(--transition-normal);
+}
+
+.task-drawer-backdrop.active {
+    opacity: 1;
+}
+
+.drawer-handle {
+    display: none;
+    justify-content: center;
+    padding: 12px 0 4px;
+    flex-shrink: 0;
+}
+
+.drawer-handle-bar {
+    width: 40px;
+    height: 4px;
+    background: var(--color-border);
+    border-radius: 2px;
+}
+
 .task-section {
     display: flex;
     flex-direction: column;
@@ -900,6 +970,7 @@ body.mode-countdown .btn-primary:hover {
     
     .page.active {
         grid-template-columns: 1fr;
+        gap: 24px;
     }
     
     .task-section {
@@ -941,76 +1012,228 @@ body.mode-countdown .btn-primary:hover {
     .history-item {
         grid-template-columns: 100px 1fr auto;
     }
+
+    .stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .stats-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .date-filter {
+        flex-wrap: wrap;
+    }
 }
 
 @media (max-width: 640px) {
     .app-container {
-        padding: 16px;
+        padding: 12px;
+        min-height: 100vh;
+        height: auto;
     }
-    
-    .progress-ring-wrapper {
-        width: 240px;
-        height: 240px;
+
+    .app-header {
+        padding: 0 4px 16px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 8px;
     }
-    
-    .time-display {
-        font-size: 48px;
+
+    .logo {
+        flex-shrink: 0;
     }
-    
-    .control-btn {
-        padding: 12px 20px;
-        font-size: 14px;
+
+    .logo-icon {
+        width: 30px;
+        height: 30px;
     }
-    
-    .tab-btn {
-        padding: 8px 16px;
-        font-size: 13px;
-    }
-    
-    .timer-controls {
-        gap: 10px;
-    }
-    
-    .time-input-group input {
-        width: 55px;
+
+    .app-title {
         font-size: 20px;
     }
 
-    .task-drawer-toggle {
-        display: flex;
+    .main-nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
     }
 
-    .task-drawer-backdrop {
-        display: block;
+    .nav-btn {
+        padding: 8px 14px;
+        font-size: 13px;
     }
 
-    .task-section.task-drawer {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 201;
-        max-height: 75vh;
-        min-height: 50vh;
-        border-radius: 20px 20px 0 0;
-        padding: 0 20px 20px;
-        transform: translateY(100%);
-        transition: transform var(--transition-normal);
-        background: var(--color-bg-dark);
-        border: none;
-        border-top: 1px solid var(--color-border);
+    .nav-btn svg {
+        width: 16px;
+        height: 16px;
     }
 
-    .task-section.task-drawer.open {
-        transform: translateY(0);
+    .header-actions {
+        gap: 4px;
     }
 
-    .drawer-handle {
-        display: flex;
+    .icon-btn {
+        width: 38px;
+        height: 38px;
+    }
+
+    .icon-btn svg {
+        width: 18px;
+        height: 18px;
     }
 
     .page.active {
         grid-template-columns: 1fr;
+        gap: 20px;
+        min-height: 0;
+        padding-bottom: 100px;
+    }
+
+    .timer-section {
+        gap: 20px;
+    }
+
+    .mode-tabs {
+        padding: 4px;
+        gap: 2px;
+    }
+
+    .progress-ring-wrapper {
+        width: 220px;
+        height: 220px;
+    }
+
+    .time-display {
+        font-size: 44px;
+    }
+
+    .pomodoro-status {
+        margin-bottom: 8px;
+    }
+
+    .status-text {
+        font-size: 12px;
+    }
+
+    .pomodoro-counter {
+        font-size: 13px;
+    }
+
+    .timer-controls {
+        gap: 8px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .control-btn {
+        padding: 10px 18px;
+        font-size: 13px;
+    }
+
+    .control-btn svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .btn-primary {
+        min-width: 120px;
+    }
+
+    .tab-btn {
+        padding: 8px 14px;
+        font-size: 13px;
+    }
+
+    .settings-panel {
+        max-width: 100%;
+        padding: 18px;
+        border-radius: var(--radius-md);
+    }
+
+    .setting-title {
+        font-size: 15px;
+        margin-bottom: 16px;
+    }
+
+    .setting-row {
+        padding: 10px 0;
+    }
+
+    .setting-row label {
+        font-size: 13px;
+    }
+
+    .number-input input {
+        width: 52px;
+        font-size: 13px;
+    }
+
+    .num-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 16px;
+    }
+
+    .unit {
+        font-size: 12px;
+        min-width: 24px;
+    }
+
+    .time-inputs {
+        gap: 4px;
+        margin-bottom: 16px;
+    }
+
+    .time-input-group input {
+        width: 50px;
+        font-size: 18px;
+        padding: 10px;
+    }
+
+    .time-separator {
+        font-size: 22px;
+        margin-bottom: 16px;
+    }
+
+    .time-label {
+        font-size: 11px;
+    }
+
+    .preset-buttons {
+        margin-top: 12px;
+        gap: 6px;
+    }
+
+    .preset-btn {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .task-drawer-toggle {
+        display: flex;
+        bottom: 16px;
+        right: 16px;
+        padding: 10px 18px;
+        font-size: 13px;
+    }
+
+    .task-drawer-toggle svg {
+        width: 16px;
+        height: 16px;
+    }
+
+    .task-drawer-badge {
+        font-size: 11px;
+        padding: 2px 6px;
+    }
+
+    .task-drawer-backdrop {
+        display: block;
     }
 
     .task-section {
@@ -1019,15 +1242,286 @@ body.mode-countdown .btn-primary:hover {
 
     .task-section.task-drawer {
         display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        z-index: 201;
+        height: 70vh;
+        max-height: 80vh;
+        border-radius: 20px 20px 0 0;
+        padding: 0 16px 16px;
+        transition: top 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        background: var(--color-bg-dark);
+        border: none;
+        border-top: 1px solid var(--color-border);
+        box-sizing: border-box;
+        overflow: hidden;
+        top: 100%;
     }
 
-    .header-actions {
-        gap: 4px;
+    .drawer-handle {
+        display: flex;
     }
 
-    .icon-btn {
+    .task-header {
+        margin-bottom: 16px;
+        padding-top: 8px;
+    }
+
+    .task-title {
+        font-size: 17px;
+    }
+
+    .task-title svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .task-count {
+        font-size: 12px;
+    }
+
+    .task-input-wrapper {
+        margin-bottom: 12px;
+    }
+
+    .task-input {
+        padding: 10px 14px;
+        font-size: 13px;
+    }
+
+    .add-task-btn {
         width: 40px;
         height: 40px;
+    }
+
+    .add-task-btn svg {
+        width: 18px;
+        height: 18px;
+    }
+
+    .task-list {
+        margin-bottom: 12px;
+    }
+
+    .task-item {
+        padding: 12px;
+        gap: 10px;
+    }
+
+    .task-text {
+        font-size: 13px;
+    }
+
+    .task-pomodoros {
+        font-size: 11px;
+    }
+
+    .checkmark {
+        width: 20px;
+        height: 20px;
+    }
+
+    .checkmark svg {
+        width: 12px;
+        height: 12px;
+    }
+
+    .task-delete {
+        width: 28px;
+        height: 28px;
+        opacity: 1;
+    }
+
+    .task-delete svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .task-stats {
+        gap: 8px;
+        padding-top: 12px;
+    }
+
+    .stat-value {
+        font-size: 18px;
+    }
+
+    .stat-label {
+        font-size: 10px;
+    }
+
+    .page-statistics.active {
+        padding-bottom: 100px;
+        overflow-y: auto;
+        padding-right: 0;
+    }
+
+    .statistics-container {
+        gap: 16px;
+    }
+
+    .stats-title {
+        font-size: 20px;
+    }
+
+    .stats-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .stats-actions {
+        width: 100%;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .date-filter {
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        gap: 6px;
+    }
+
+    .date-input {
+        font-size: 12px;
+        padding: 6px 10px;
+        width: 140px;
+    }
+
+    .date-separator {
+        font-size: 12px;
+    }
+
+    .btn-secondary, .btn-ghost {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    #generateReportBtn {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .stats-summary-cards {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+
+    .summary-card {
+        padding: 14px;
+        gap: 10px;
+    }
+
+    .summary-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 20px;
+    }
+
+    .summary-value {
+        font-size: 20px;
+    }
+
+    .summary-label {
+        font-size: 11px;
+    }
+
+    .stats-charts {
+        grid-template-columns: 1fr;
+        gap: 12px;
+    }
+
+    .chart-card {
+        padding: 14px;
+    }
+
+    .chart-card:first-child,
+    .chart-card:nth-child(2),
+    .chart-card:nth-child(3) {
+        grid-column: 1 / -1;
+    }
+
+    .chart-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .chart-title {
+        font-size: 15px;
+    }
+
+    .heatmap-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+        gap: 6px;
+    }
+
+    .heatmap-day {
+        font-size: 11px;
+    }
+
+    .heatmap-count {
+        font-size: 10px;
+    }
+
+    .heatmap-legend {
+        font-size: 10px;
+    }
+
+    .linechart-container {
+        height: 180px;
+    }
+
+    .piechart-container {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .piechart-container canvas {
+        width: 140px !important;
+        height: 140px !important;
+    }
+
+    .piechart-legend {
+        width: 100%;
+        max-height: none;
+    }
+
+    .pie-legend-item {
+        font-size: 11px;
+    }
+
+    .stats-history {
+        padding: 14px;
+    }
+
+    .history-date-text {
+        font-size: 13px;
+    }
+
+    .history-date-stats {
+        font-size: 11px;
+    }
+
+    .history-item {
+        grid-template-columns: 80px 1fr auto;
+        gap: 8px;
+        padding: 10px;
+    }
+
+    .history-time {
+        font-size: 11px;
+    }
+
+    .history-task {
+        font-size: 12px;
+    }
+
+    .history-duration {
+        font-size: 11px;
     }
 }
 
@@ -1598,76 +2092,6 @@ body.fullscreen-mode .time-display {
     color: var(--color-accent-neutral);
     font-weight: 500;
     flex-shrink: 0;
-}
-
-.task-drawer-toggle {
-    display: none;
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    z-index: 100;
-    padding: 12px 20px;
-    background: linear-gradient(135deg, var(--color-accent-neutral) 0%, #d48806 100%);
-    color: white;
-    border: none;
-    border-radius: 50px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    box-shadow: 0 4px 20px rgba(243, 156, 18, 0.4);
-    align-items: center;
-    gap: 8px;
-    transition: all var(--transition-fast);
-    font-family: inherit;
-}
-
-.task-drawer-toggle:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(243, 156, 18, 0.5);
-}
-
-.task-drawer-toggle svg {
-    width: 18px;
-    height: 18px;
-}
-
-.task-drawer-badge {
-    background: rgba(255, 255, 255, 0.3);
-    padding: 2px 8px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.task-drawer-backdrop {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
-    z-index: 200;
-    opacity: 0;
-    transition: opacity var(--transition-normal);
-}
-
-.task-drawer-backdrop.active {
-    opacity: 1;
-}
-
-.drawer-handle {
-    display: none;
-    justify-content: center;
-    padding: 12px 0 4px;
-    flex-shrink: 0;
-}
-
-.drawer-handle-bar {
-    width: 40px;
-    height: 4px;
-    background: var(--color-border);
-    border-radius: 2px;
 }
 
 
